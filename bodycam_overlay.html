@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bodycam V3 Realtime Overlay</title>
+    
+    <style>
+        body {
+            background-color: #222222; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Consolas', 'Courier New', monospace; 
+        }
+
+        /* Container Overlay Bodycam Utama */
+        .bodycam-overlay {
+            /* === PERUBAHAN UTAMA: SET WIDTH KE AUTO === */
+            /* Overlay akan menyesuaikan lebarnya sesuai isi konten */
+            width: auto; 
+            height: 100px;
+            
+            background-color: rgba(119, 119, 119, 0.8); 
+            
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            display: flex;
+            justify-content: flex-end; /* Rata kanan di dalam overlay */
+            align-items: center;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); 
+        }
+
+        /* Container Informasi Teks (Sisi Kiri Konten) */
+        .info-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            /* HAPUS flex-grow: 1; agar container teks tidak memakan ruang kosong */
+            align-items: flex-end; /* Rata Kanan untuk semua baris teks */
+            margin-right: 15px; /* Menambahkan jarak pemisah antara teks dan logo */
+        }
+
+        .line {
+            display: flex;
+            justify-content: flex-end; /* Rata KANAN untuk isi di dalam baris */
+            align-items: center;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        /* Gaya Baris Teks */
+        .line.top-info { font-size: 15px; font-weight: bold; }
+        .line.name-info { 
+            font-size: 17px; 
+            font-weight: bold; 
+            margin-top: -3px; 
+        }
+        .line.dept-info { 
+            font-size: 14px; 
+            margin-bottom: 5px; 
+            text-transform: uppercase;
+        }
+        .line.datetime-info {
+            font-size: 15px;
+            letter-spacing: 1.5px;
+        }
+
+        .spacer { width: 8px; }
+
+        /* Titik Merah REC dan Animasi Kedip */
+        .rec-dot {
+            width: 7px;
+            height: 7px;
+            background-color: red;
+            border-radius: 50%;
+            margin-left: 10px; 
+            margin-right: 5px; 
+            box-shadow: 0 0 4px red;
+            animation: blink 1.5s ease-in-out infinite; 
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }      
+            50% { opacity: 0.1; }   
+            100% { opacity: 1; }    
+        }
+        
+        /* Container Logo */
+        .logo-container {
+            width: 70px; 
+            height: 70px;
+            flex-shrink: 0; 
+        }
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <audio loop autoplay>
+        <source src="double-beep.wav" type="audio/mp3">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
+    
+    <div class="bodycam-overlay">
+        <div class="info-container">
+            <div class="line top-info">
+                <span>REC</span>
+                <span class="rec-dot"></span> 
+                <span>XION VALIANT-CAM™</span>
+            </div>
+
+            <div class="line name-info">
+                <span>F. Xiang [99777]</span>
+            </div>
+
+            <div class="line dept-info">
+                <span>EAST LOS SANTOS SHERIFF DEPARTMENT</span>
+            </div>
+
+            <div class="line datetime-info" id="realtime-datetime">
+                INITIATING TIME...
+            </div>
+        </div>
+
+        <div class="logo-container">
+            <img src="logo.png" alt="BD" style="width: 100%; height: 100%;">
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const element = document.getElementById('realtime-datetime');
+
+            // Opsi untuk format WIB (Waktu Indonesia Barat)
+            const wibOptions = {
+                timeZone: 'Asia/Jakarta', 
+                hour12: false 
+            };
+            
+            // Mengambil komponen waktu dengan zona waktu WIB
+            const day = new Intl.DateTimeFormat('en-US', { day: '2-digit', ...wibOptions }).format(now);
+            const month = new Intl.DateTimeFormat('en-US', { month: 'short', ...wibOptions }).format(now).toUpperCase();
+            const year = new Intl.DateTimeFormat('en-US', { year: 'numeric', ...wibOptions }).format(now);
+            
+            const hours = new Intl.DateTimeFormat('en-US', { hour: '2-digit', ...wibOptions }).format(now);
+            const minutes = new Intl.DateTimeFormat('en-US', { minute: '2-digit', ...wibOptions }).format(now);
+            const seconds = new Intl.DateTimeFormat('en-US', { second: '2-digit', ...wibOptions }).format(now);
+            
+            // Singkatan TZO diset manual ke WIB
+            const tzoAbbreviation = 'GMT+7'; 
+
+            const formattedTime = 
+                `${day} ${month} ${year} \u00A0 ${hours} : ${minutes} : ${seconds} ${tzoAbbreviation}`; 
+
+            element.innerHTML = formattedTime;
+        }
+
+        // Jalankan fungsi dan ulangi setiap 1 detik
+        updateTime(); 
+        setInterval(updateTime, 1000); 
+    </script>
+</body>
+</html>
